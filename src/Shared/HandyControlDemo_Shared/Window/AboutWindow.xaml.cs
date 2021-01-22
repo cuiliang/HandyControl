@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using HandyControlDemo.Tools;
 
 namespace HandyControlDemo.Window
@@ -30,6 +31,27 @@ namespace HandyControlDemo.Window
         {
             get => (string) GetValue(VersionProperty);
             set => SetValue(VersionProperty, value);
+        }
+
+        private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
+        {
+            var dispatcher = DispatcherBuilder.Build();
+
+            dispatcher.InvokeAsync(() =>
+            {
+                try
+                {
+                    MainWindow mainWindow = new MainWindow();
+                    mainWindow.Show();
+
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+
+
+            });
         }
     }
 }

@@ -50,5 +50,7 @@ namespace HandyControlDemo
                 base.OnClosing(e);
             }
         }
+
+       
     }
 }
