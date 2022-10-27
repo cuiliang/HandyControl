@@ -260,7 +260,13 @@ namespace HandyControl.Controls
 
         protected override void OnStateChanged(EventArgs e)
         {
+
             base.OnStateChanged(e);
+
+            return;
+
+            // 开启后，最大化会显示在左上角。停用了似乎也没有什么影响。
+            // https://github.com/cuiliang/qk-issues/issues/821
             if (WindowState == WindowState.Maximized)
             {
                 BorderThickness = new Thickness();
@@ -272,6 +278,9 @@ namespace HandyControl.Controls
                 BorderThickness = _actualBorderThickness;
                 NonClientAreaHeight = _tempNonClientAreaHeight;
             }
+
+
+
         }
 
         protected void OnLoaded(RoutedEventArgs args)
