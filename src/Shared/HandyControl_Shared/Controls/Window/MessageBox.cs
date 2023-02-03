@@ -136,7 +136,7 @@ namespace HandyControl.Controls
 
         protected override void OnClosed(EventArgs e)
         {
-            InteropMethods.SetForegroundWindow(_lastActiveWindowIntPtr);
+            //InteropMethods.SetForegroundWindow(_lastActiveWindowIntPtr);
 
             base.OnClosed(e);
         }
