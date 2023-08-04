@@ -488,8 +488,17 @@ namespace HandyControl.Controls
                 {
                     if (double.TryParse(_textBox.Text, out var value))
                     {
-                        if (value < Minimum || value > Maximum)
+                        //if (value < Minimum || value > Maximum)
+                        //{
+                        //    result = OperationResult.Failed(Properties.Langs.Lang.OutOfRange);
+                        //}
+                        if (value < Minimum)
                         {
+                            Value = Minimum;
+                            result = OperationResult.Failed(Properties.Langs.Lang.OutOfRange);
+                        }else if (value > Maximum)
+                        {
+                            Value = Maximum;
                             result = OperationResult.Failed(Properties.Langs.Lang.OutOfRange);
                         }
                         else
