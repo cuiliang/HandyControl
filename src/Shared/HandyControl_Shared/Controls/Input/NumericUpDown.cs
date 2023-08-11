@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -8,6 +9,7 @@ using System.Windows.Media;
 using HandyControl.Data;
 using HandyControl.Interactivity;
 using HandyControl.Tools;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace HandyControl.Controls
 {
@@ -15,26 +17,16 @@ namespace HandyControl.Controls
     ///     数值选择控件
     /// </summary>
     [TemplatePart(Name = ElementTextBox, Type = typeof(TextBox))]
-    [TemplatePart(Name = ElementErrorTip, Type = typeof(UIElement))]
-    public class NumericUpDown : Control, IDataInput
+    public class NumericUpDown : Control
     {
         #region Constants
 
         private const string ElementTextBox = "PART_TextBox";
 
-        private const string ElementErrorTip = "PART_ErrorTip";
 
         #endregion Constants
 
-        #region Data
-
         private TextBox _textBox;
-
-        private UIElement _errorTip;
-
-        private bool _updateText;
-
-        #endregion Data
 
         public NumericUpDown()
         {
@@ -42,13 +34,13 @@ namespace HandyControl.Controls
             {
                 if (IsReadOnly) return;
 
-                Value += Increment;
+                SetCurrentValue(ValueProperty, Value + Increment);
             }));
             CommandBindings.Add(new CommandBinding(ControlCommands.Next, (s, e) =>
             {
                 if (IsReadOnly) return;
 
-                Value -= Increment;
+                SetCurrentValue(ValueProperty, Value - Increment);
             }));
             CommandBindings.Add(new CommandBinding(ControlCommands.Clear, (s, e) =>
             {
@@ -56,92 +48,64 @@ namespace HandyControl.Controls
 
                 SetCurrentValue(ValueProperty, ValueBoxes.Double0Box);
             }));
-
-            Loaded += (s, e) => OnApplyTemplate();
-        }
-
-        protected override void OnGotFocus(RoutedEventArgs e)
-        {
-            base.OnGotFocus(e);
-
-            if (_textBox != null)
-            {
-                _textBox?.Focus();
-                _textBox.Select(_textBox.Text.Length, 0);
-            }
         }
 
         public override void OnApplyTemplate()
         {
             if (_textBox != null)
             {
-                TextCompositionManager.RemovePreviewTextInputHandler(_textBox, PreviewTextInputHandler);
-                _textBox.TextChanged -= TextBox_TextChanged;
                 _textBox.PreviewKeyDown -= TextBox_PreviewKeyDown;
+                _textBox.TextChanged -= TextBox_TextChanged;
                 _textBox.LostFocus -= TextBox_LostFocus;
             }
 
             base.OnApplyTemplate();
 
             _textBox = GetTemplateChild(ElementTextBox) as TextBox;
-            _errorTip = GetTemplateChild(ElementErrorTip) as UIElement;
 
             if (_textBox != null)
             {
                 _textBox.SetBinding(SelectionBrushProperty, new Binding(SelectionBrushProperty.Name) { Source = this });
-#if !(NET40 || NET45 || NET451 || NET452 || NET46 || NET461 || NET462 || NET47 || NET471 || NET472)
-                _textBox.SetBinding(SelectionTextBrushProperty, new Binding(SelectionTextBrushProperty.Name) { Source = this });
+#if NET48_OR_GREATER
+            _textBox.SetBinding(SelectionTextBrushProperty, new Binding(SelectionTextBrushProperty.Name) { Source =
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        this });
 #endif
-                _textBox.SetBinding(SelectionOpacityProperty, new Binding(SelectionOpacityProperty.Name) { Source = this });
+                _textBox.SetBinding(SelectionOpacityProperty,
+                    new Binding(SelectionOpacityProperty.Name) { Source = this });
                 _textBox.SetBinding(CaretBrushProperty, new Binding(CaretBrushProperty.Name) { Source = this });
 
-                TextCompositionManager.AddPreviewTextInputHandler(_textBox, PreviewTextInputHandler);
-                _textBox.TextChanged += TextBox_TextChanged;
                 _textBox.PreviewKeyDown += TextBox_PreviewKeyDown;
+                _textBox.TextChanged += TextBox_TextChanged;
                 _textBox.LostFocus += TextBox_LostFocus;
                 _textBox.Text = CurrentText;
             }
         }
 
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e) => UpdateData();
-
-        private void UpdateData()
-        {
-            if (!VerifyData())
-            {
-                _updateText = true;
-                return;
-            }
-
-            _updateText = false;
-
-            if (string.IsNullOrWhiteSpace(_textBox.Text))
-            {
-                Value = 0;
-
-                SetCurrentValue(ErrorStrProperty, string.Empty);
-                SetCurrentValue(IsErrorProperty, ValueBoxes.FalseBox);
-            }
-            else if (double.TryParse(_textBox.Text, out var value))
-            {
-                Value = value;
-
-                if (Validation.GetHasError(this))
-                {
-                    SetCurrentValue(ErrorStrProperty, Validation.GetErrors(this)[0].ErrorContent?.ToString());
-                    SetCurrentValue(IsErrorProperty, ValueBoxes.TrueBox);
-                }
-            }
-
-            _updateText = true;
-        }
-
-        private void PreviewTextInputHandler(object sender, TextCompositionEventArgs e) => UpdateData();
-
         private void TextBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (IsError && _errorTip != null) return;
-            _textBox.Text = CurrentText;
+            if (string.IsNullOrWhiteSpace(_textBox.Text))
+            {
+                SetCurrentValue(ValueProperty, ValueBoxes.Double0Box);
+            }
+            else if (double.TryParse(_textBox.Text, out double value))
+            {
+                SetCurrentValue(ValueProperty, value);
+            }
+            else
+            {
+                SetText(true);
+            }
+        }
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (double.TryParse(_textBox.Text, out double value))
+            {
+                if (value >= Minimum && value <= Maximum)
+                {
+                    SetCurrentValue(ValueProperty, value);
+                }
+            }
         }
 
         private void TextBox_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -165,6 +129,7 @@ namespace HandyControl.Controls
             if (_textBox.IsFocused && !IsReadOnly)
             {
                 Value += e.Delta > 0 ? Increment : -Increment;
+                SetText(true);
                 e.Handled = true;
             }
         }
@@ -197,7 +162,7 @@ namespace HandyControl.Controls
         ///     当前值
         /// </summary>
         public static readonly DependencyProperty ValueProperty = DependencyProperty.Register(
-            "Value", typeof(double), typeof(NumericUpDown),
+            nameof(Value), typeof(double), typeof(NumericUpDown),
             new FrameworkPropertyMetadata(ValueBoxes.Double0Box, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
                 OnValueChanged, CoerceValue), ValidateHelper.IsInRangeOfDouble);
 
@@ -213,9 +178,9 @@ namespace HandyControl.Controls
             });
         }
 
-        private void SetText()
+        private void SetText(bool force = false)
         {
-            if (_updateText && _textBox != null)
+            if (_textBox != null && (!_textBox.IsFocused || force))
             {
                 _textBox.Text = CurrentText;
                 _textBox.Select(_textBox.Text.Length, 0);
@@ -232,11 +197,13 @@ namespace HandyControl.Controls
                 ctl.Value = minimum;
                 return minimum;
             }
+
             var maximum = ctl.Maximum;
             if (num > maximum)
             {
                 ctl.Value = maximum;
             }
+
             ctl.SetText();
             return num > maximum ? maximum : num;
         }
@@ -254,7 +221,8 @@ namespace HandyControl.Controls
         ///     最大值
         /// </summary>
         public static readonly DependencyProperty MaximumProperty = DependencyProperty.Register(
-            "Maximum", typeof(double), typeof(NumericUpDown), new PropertyMetadata(double.MaxValue, OnMaximumChanged, CoerceMaximum), ValidateHelper.IsInRangeOfDouble);
+            nameof(Maximum), typeof(double), typeof(NumericUpDown),
+            new PropertyMetadata(double.MaxValue, OnMaximumChanged, CoerceMaximum), ValidateHelper.IsInRangeOfDouble);
 
         private static void OnMaximumChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -282,7 +250,8 @@ namespace HandyControl.Controls
         ///     最小值
         /// </summary>
         public static readonly DependencyProperty MinimumProperty = DependencyProperty.Register(
-            "Minimum", typeof(double), typeof(NumericUpDown), new PropertyMetadata(double.MinValue, OnMinimumChanged, CoerceMinimum), ValidateHelper.IsInRangeOfDouble);
+            nameof(Minimum), typeof(double), typeof(NumericUpDown),
+            new PropertyMetadata(double.MinValue, OnMinimumChanged, CoerceMinimum), ValidateHelper.IsInRangeOfDouble);
 
         private static void OnMinimumChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -310,7 +279,7 @@ namespace HandyControl.Controls
         ///     指示每单击一下按钮时增加或减少的数量
         /// </summary>
         public static readonly DependencyProperty IncrementProperty = DependencyProperty.Register(
-            "Increment", typeof(double), typeof(NumericUpDown), new PropertyMetadata(ValueBoxes.Double1Box));
+            nameof(Increment), typeof(double), typeof(NumericUpDown), new PropertyMetadata(ValueBoxes.Double1Box));
 
         /// <summary>
         ///     指示每单击一下按钮时增加或减少的数量
@@ -325,7 +294,7 @@ namespace HandyControl.Controls
         ///     指示要显示的小数位数
         /// </summary>
         public static readonly DependencyProperty DecimalPlacesProperty = DependencyProperty.Register(
-            "DecimalPlaces", typeof(int?), typeof(NumericUpDown), new PropertyMetadata(default(int?)));
+            nameof(DecimalPlaces), typeof(int?), typeof(NumericUpDown), new PropertyMetadata(default(int?)));
 
         /// <summary>
         ///     指示要显示的小数位数
@@ -340,7 +309,7 @@ namespace HandyControl.Controls
         ///     指示要显示的数字的格式
         /// </summary>
         public static readonly DependencyProperty ValueFormatProperty = DependencyProperty.Register(
-            "ValueFormat", typeof(string), typeof(NumericUpDown), new PropertyMetadata(default(string)));
+            nameof(ValueFormat), typeof(string), typeof(NumericUpDown), new PropertyMetadata(default(string)));
 
         /// <summary>
         ///     指示要显示的数字的格式，这将会覆盖 <see cref="DecimalPlaces"/> 属性
@@ -355,7 +324,7 @@ namespace HandyControl.Controls
         ///     是否显示上下调值按钮
         /// </summary>
         internal static readonly DependencyProperty ShowUpDownButtonProperty = DependencyProperty.Register(
-            "ShowUpDownButton", typeof(bool), typeof(NumericUpDown), new PropertyMetadata(ValueBoxes.TrueBox));
+            nameof(ShowUpDownButton), typeof(bool), typeof(NumericUpDown), new PropertyMetadata(ValueBoxes.TrueBox));
 
         /// <summary>
         ///     是否显示上下调值按钮
@@ -367,61 +336,10 @@ namespace HandyControl.Controls
         }
 
         /// <summary>
-        ///     数据是否错误
-        /// </summary>
-        public static readonly DependencyProperty IsErrorProperty = DependencyProperty.Register(
-            "IsError", typeof(bool), typeof(NumericUpDown), new PropertyMetadata(ValueBoxes.FalseBox));
-
-        public bool IsError
-        {
-            get => (bool) GetValue(IsErrorProperty);
-            set => SetValue(IsErrorProperty, ValueBoxes.BooleanBox(value));
-        }
-
-        /// <summary>
-        ///     错误提示
-        /// </summary>
-        public static readonly DependencyProperty ErrorStrProperty = DependencyProperty.Register(
-            "ErrorStr", typeof(string), typeof(NumericUpDown), new PropertyMetadata(default(string)));
-
-        public string ErrorStr
-        {
-            get => (string) GetValue(ErrorStrProperty);
-            set => SetValue(ErrorStrProperty, value);
-        }
-
-        public static readonly DependencyPropertyKey TextTypePropertyKey =
-            DependencyProperty.RegisterReadOnly("TextType", typeof(TextType), typeof(NumericUpDown),
-                new PropertyMetadata(default(TextType)));
-
-        /// <summary>
-        ///     文本类型
-        /// </summary>
-        public static readonly DependencyProperty TextTypeProperty = TextTypePropertyKey.DependencyProperty;
-
-        public TextType TextType
-        {
-            get => (TextType) GetValue(TextTypeProperty);
-            set => SetValue(TextTypeProperty, value);
-        }
-
-        /// <summary>
-        ///     是否显示清除按钮
-        /// </summary>
-        public static readonly DependencyProperty ShowClearButtonProperty = DependencyProperty.Register(
-            "ShowClearButton", typeof(bool), typeof(NumericUpDown), new PropertyMetadata(ValueBoxes.FalseBox));
-
-        public bool ShowClearButton
-        {
-            get => (bool) GetValue(ShowClearButtonProperty);
-            set => SetValue(ShowClearButtonProperty, ValueBoxes.BooleanBox(value));
-        }
-
-        /// <summary>
         ///     标识 IsReadOnly 依赖属性。
         /// </summary>
         public static readonly DependencyProperty IsReadOnlyProperty = DependencyProperty.Register(
-            "IsReadOnly", typeof(bool), typeof(NumericUpDown), new PropertyMetadata(ValueBoxes.FalseBox));
+            nameof(IsReadOnly), typeof(bool), typeof(NumericUpDown), new PropertyMetadata(ValueBoxes.FalseBox));
 
         /// <summary>
         ///     获取或设置一个值，该值指示NumericUpDown是否只读。
@@ -441,16 +359,16 @@ namespace HandyControl.Controls
             set => SetValue(SelectionBrushProperty, value);
         }
 
-#if !(NET40 || NET45 || NET451 || NET452 || NET46 || NET461 || NET462 || NET47 || NET471 || NET472)
+#if NET48_OR_GREATER
 
-        public static readonly DependencyProperty SelectionTextBrushProperty =
-            TextBoxBase.SelectionTextBrushProperty.AddOwner(typeof(NumericUpDown));
+    public static readonly DependencyProperty SelectionTextBrushProperty =
+        TextBoxBase.SelectionTextBrushProperty.AddOwner(typeof(NumericUpDown));
 
-        public Brush SelectionTextBrush
-        {
-            get => (Brush) GetValue(SelectionTextBrushProperty);
-            set => SetValue(SelectionTextBrushProperty, value);
-        }
+    public Brush SelectionTextBrush
+    {
+        get => (Brush) GetValue(SelectionTextBrushProperty);
+        set => SetValue(SelectionTextBrushProperty, value);
+    }
 
 #endif
 
@@ -470,60 +388,6 @@ namespace HandyControl.Controls
         {
             get => (Brush) GetValue(CaretBrushProperty);
             set => SetValue(CaretBrushProperty, value);
-        }
-
-        public Func<string, OperationResult<bool>> VerifyFunc { get; set; }
-
-        public virtual bool VerifyData()
-        {
-            OperationResult<bool> result;
-
-            if (VerifyFunc != null)
-            {
-                result = VerifyFunc.Invoke(_textBox.Text);
-            }
-            else
-            {
-                if (!string.IsNullOrEmpty(_textBox.Text))
-                {
-                    if (double.TryParse(_textBox.Text, out var value))
-                    {
-                        //if (value < Minimum || value > Maximum)
-                        //{
-                        //    result = OperationResult.Failed(Properties.Langs.Lang.OutOfRange);
-                        //}
-                        if (value < Minimum)
-                        {
-                            Value = Minimum;
-                            result = OperationResult.Failed(Properties.Langs.Lang.OutOfRange);
-                        }else if (value > Maximum)
-                        {
-                            Value = Maximum;
-                            result = OperationResult.Failed(Properties.Langs.Lang.OutOfRange);
-                        }
-                        else
-                        {
-                            result = OperationResult.Success();
-                        }
-                    }
-                    else
-                    {
-                        result = OperationResult.Failed(Properties.Langs.Lang.FormatError);
-                    }
-                }
-                else if (InfoElement.GetNecessary(this))
-                {
-                    result = OperationResult.Failed(Properties.Langs.Lang.IsNecessary);
-                }
-                else
-                {
-                    result = OperationResult.Success();
-                }
-            }
-
-            SetCurrentValue(ErrorStrProperty, result.Message);
-            SetCurrentValue(IsErrorProperty, ValueBoxes.BooleanBox(!result.Data));
-            return result.Data;
         }
     }
 }
