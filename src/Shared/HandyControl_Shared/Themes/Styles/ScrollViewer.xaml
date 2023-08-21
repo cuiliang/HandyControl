@@ -47,7 +47,8 @@
     </ControlTemplate>
     
     <Style x:Key="ScrollViewerUpDown" TargetType="ScrollViewer">
-        <Setter Property="VerticalScrollBarVisibility" Value="{Binding Path=(hc:ScrollViewer.VerticalScrollBarVisibility),RelativeSource={RelativeSource TemplatedParent}}" />
+        <!-- 这里改成Auto以隐藏右键菜单默认显示的滚动按钮，旧值：{Binding Path=(hc:ScrollViewer.VerticalScrollBarVisibility),RelativeSource={RelativeSource TemplatedParent}} -->
+        <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
         <Setter Property="Focusable" Value="False"/>
         <Setter Property="Template" Value="{StaticResource ScrollViewerUpDownControlTemplate}"/>
     </Style>
