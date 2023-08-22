@@ -24,6 +24,19 @@ public class SearchBar : TextBox, ICommandSource
         remove => RemoveHandler(SearchStartedEvent, value);
     }
 
+    public bool ShowClearButton
+    {
+        get
+        {
+            return (bool) GetValue(InfoElement.ShowClearButtonProperty);
+        }
+
+        set
+        {
+            SetValue(InfoElement.ShowClearButtonProperty, value);
+        }
+    }
+
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
