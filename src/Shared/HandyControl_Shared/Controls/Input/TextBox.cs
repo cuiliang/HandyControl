@@ -17,4 +17,17 @@ public class TextBox : System.Windows.Controls.TextBox
             SetCurrentValue(TextProperty, string.Empty);
         }));
     }
+
+    public bool ShowClearButton
+    {
+        get
+        {
+            return (bool) GetValue(InfoElement.ShowClearButtonProperty);
+        }
+
+        set
+        {
+            SetValue(InfoElement.ShowClearButtonProperty, value);
+        }
+    }
 }
