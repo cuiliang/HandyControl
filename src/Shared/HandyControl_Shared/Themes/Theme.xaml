@@ -5103,6 +5103,31 @@
       </Setter.Value>
     </Setter>
   </Style>
+  <Style x:Key="ComboBoxToggleButton" TargetType="ToggleButton">
+    <Setter Property="OverridesDefaultStyle" Value="true" />
+    <Setter Property="IsTabStop" Value="false" />
+    <Setter Property="Focusable" Value="false" />
+    <Setter Property="ClickMode" Value="Press" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ToggleButton">
+          <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{Binding Path=(hc:BorderElement.CornerRadius), RelativeSource={RelativeSource TemplatedParent}}" SnapsToDevicePixels="true">
+            <Border Width="{StaticResource {x:Static SystemParameters.VerticalScrollBarWidthKey}}" Margin="0,0,6,0" HorizontalAlignment="Right" BorderBrush="Transparent" BorderThickness="1" SnapsToDevicePixels="true">
+              <Path x:Name="arrow" Width="16" Height="9" HorizontalAlignment="Center" VerticalAlignment="Center" Data="{StaticResource DownGeometry}" Fill="{TemplateBinding BorderBrush}" Stretch="Uniform" />
+            </Border>
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsChecked" Value="True">
+              <Setter TargetName="arrow" Property="Data" Value="{StaticResource UpGeometry}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter Property="Opacity" Value=".4" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
   <ControlTemplate x:Key="ComboBoxTemplate" TargetType="ComboBox">
     <Grid>
       <Grid.ColumnDefinitions>

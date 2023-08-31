@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -9,22 +8,16 @@ using System.Windows.Media;
 using HandyControl.Data;
 using HandyControl.Interactivity;
 using HandyControl.Tools;
-using static System.Net.Mime.MediaTypeNames;
 
-namespace HandyControl.Controls
-{
+namespace HandyControl.Controls;
+
     /// <summary>
     ///     数值选择控件
     /// </summary>
     [TemplatePart(Name = ElementTextBox, Type = typeof(TextBox))]
     public class NumericUpDown : Control
     {
-        #region Constants
-
         private const string ElementTextBox = "PART_TextBox";
-
-
-        #endregion Constants
 
         private TextBox _textBox;
 
@@ -67,11 +60,9 @@ namespace HandyControl.Controls
             {
                 _textBox.SetBinding(SelectionBrushProperty, new Binding(SelectionBrushProperty.Name) { Source = this });
 #if NET48_OR_GREATER
-            _textBox.SetBinding(SelectionTextBrushProperty, new Binding(SelectionTextBrushProperty.Name) { Source =
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        this });
+            _textBox.SetBinding(SelectionTextBrushProperty, new Binding(SelectionTextBrushProperty.Name) { Source = this });
 #endif
-                _textBox.SetBinding(SelectionOpacityProperty,
-                    new Binding(SelectionOpacityProperty.Name) { Source = this });
+            _textBox.SetBinding(SelectionOpacityProperty, new Binding(SelectionOpacityProperty.Name) { Source = this });
                 _textBox.SetBinding(CaretBrushProperty, new Binding(CaretBrushProperty.Name) { Source = this });
 
                 _textBox.PreviewKeyDown += TextBox_PreviewKeyDown;
@@ -197,13 +188,11 @@ namespace HandyControl.Controls
                 ctl.Value = minimum;
                 return minimum;
             }
-
             var maximum = ctl.Maximum;
             if (num > maximum)
             {
                 ctl.Value = maximum;
             }
-
             ctl.SetText();
             return num > maximum ? maximum : num;
         }
@@ -221,8 +210,7 @@ namespace HandyControl.Controls
         ///     最大值
         /// </summary>
         public static readonly DependencyProperty MaximumProperty = DependencyProperty.Register(
-            nameof(Maximum), typeof(double), typeof(NumericUpDown),
-            new PropertyMetadata(double.MaxValue, OnMaximumChanged, CoerceMaximum), ValidateHelper.IsInRangeOfDouble);
+        nameof(Maximum), typeof(double), typeof(NumericUpDown), new PropertyMetadata(double.MaxValue, OnMaximumChanged, CoerceMaximum), ValidateHelper.IsInRangeOfDouble);
 
         private static void OnMaximumChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -250,8 +238,7 @@ namespace HandyControl.Controls
         ///     最小值
         /// </summary>
         public static readonly DependencyProperty MinimumProperty = DependencyProperty.Register(
-            nameof(Minimum), typeof(double), typeof(NumericUpDown),
-            new PropertyMetadata(double.MinValue, OnMinimumChanged, CoerceMinimum), ValidateHelper.IsInRangeOfDouble);
+        nameof(Minimum), typeof(double), typeof(NumericUpDown), new PropertyMetadata(double.MinValue, OnMinimumChanged, CoerceMinimum), ValidateHelper.IsInRangeOfDouble);
 
         private static void OnMinimumChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -390,4 +377,3 @@ namespace HandyControl.Controls
             set => SetValue(CaretBrushProperty, value);
         }
     }
-}

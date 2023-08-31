@@ -189,7 +189,7 @@ namespace HandyControl.Controls
 
         public static readonly DependencyProperty NonClientAreaHeightProperty = DependencyProperty.Register(
             nameof(NonClientAreaHeight), typeof(double), typeof(Window),
-            new PropertyMetadata(22.0));
+            new PropertyMetadata(28.0));
 
         public double NonClientAreaHeight
         {
@@ -260,13 +260,7 @@ namespace HandyControl.Controls
 
         protected override void OnStateChanged(EventArgs e)
         {
-
             base.OnStateChanged(e);
-
-            return;
-
-            // 开启后，最大化会显示在左上角。停用了似乎也没有什么影响。
-            // https://github.com/cuiliang/qk-issues/issues/821
             if (WindowState == WindowState.Maximized)
             {
                 BorderThickness = new Thickness();
@@ -278,9 +272,6 @@ namespace HandyControl.Controls
                 BorderThickness = _actualBorderThickness;
                 NonClientAreaHeight = _tempNonClientAreaHeight;
             }
-
-
-
         }
 
         protected void OnLoaded(RoutedEventArgs args)
@@ -340,9 +331,9 @@ namespace HandyControl.Controls
 
             if (monitor != IntPtr.Zero && mmi != null)
             {
-                //InteropValues.APPBARDATA appBarData = default;
-                //var autoHide = InteropMethods.SHAppBarMessage(4, ref appBarData) != 0;
-                //if (autoHide)
+                InteropValues.APPBARDATA appBarData = default;
+                var autoHide = InteropMethods.SHAppBarMessage(4, ref appBarData) != 0;
+                if (autoHide)
                 {
                     var monitorInfo = default(InteropValues.MONITORINFO);
                     monitorInfo.cbSize = (uint) Marshal.SizeOf(typeof(InteropValues.MONITORINFO));
@@ -364,11 +355,11 @@ namespace HandyControl.Controls
             switch (msg)
             {
                 case InteropValues.WM_WINDOWPOSCHANGED:
-                    //Padding = WindowState == WindowState.Maximized ? WindowHelper.WindowMaximizedPadding : _commonPadding;
+                    Padding = WindowState == WindowState.Maximized ? WindowHelper.WindowMaximizedPadding : _commonPadding;
                     break;
                 case InteropValues.WM_GETMINMAXINFO:
                     WmGetMinMaxInfo(hwnd, lparam);
-                    //Padding = WindowState == WindowState.Maximized ? WindowHelper.WindowMaximizedPadding : _commonPadding;
+                    Padding = WindowState == WindowState.Maximized ? WindowHelper.WindowMaximizedPadding : _commonPadding;
                     break;
                 case InteropValues.WM_NCHITTEST:
                     // for fixing #886

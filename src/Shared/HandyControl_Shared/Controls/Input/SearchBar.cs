@@ -24,7 +24,6 @@ public class SearchBar : TextBox, ICommandSource
         remove => RemoveHandler(SearchStartedEvent, value);
     }
 
-
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);

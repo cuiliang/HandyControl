@@ -13,8 +13,8 @@ using HandyControl.Properties.Langs;
 using HandyControl.Tools;
 using HandyControl.Tools.Interop;
 
-namespace HandyControl.Controls
-{
+namespace HandyControl.Controls;
+
     /// <summary>
     ///     消息框
     /// </summary>
@@ -53,7 +53,7 @@ namespace HandyControl.Controls
         private IntPtr _lastActiveWindowIntPtr;
 
         public static readonly DependencyProperty MessageProperty = DependencyProperty.Register(
-            "Message", typeof(string), typeof(MessageBox), new PropertyMetadata(default(string)));
+        nameof(Message), typeof(string), typeof(MessageBox), new PropertyMetadata(default(string)));
 
         public string Message
         {
@@ -62,7 +62,7 @@ namespace HandyControl.Controls
         }
 
         public static readonly DependencyProperty ImageProperty = DependencyProperty.Register(
-            "Image", typeof(Geometry), typeof(MessageBox), new PropertyMetadata(default(Geometry)));
+        nameof(Image), typeof(Geometry), typeof(MessageBox), new PropertyMetadata(default(Geometry)));
 
         public Geometry Image
         {
@@ -71,7 +71,7 @@ namespace HandyControl.Controls
         }
 
         public static readonly DependencyProperty ImageBrushProperty = DependencyProperty.Register(
-            "ImageBrush", typeof(Brush), typeof(MessageBox), new PropertyMetadata(default(Brush)));
+        nameof(ImageBrush), typeof(Brush), typeof(MessageBox), new PropertyMetadata(default(Brush)));
 
         public Brush ImageBrush
         {
@@ -80,7 +80,7 @@ namespace HandyControl.Controls
         }
 
         public static readonly DependencyProperty ShowImageProperty = DependencyProperty.Register(
-            "ShowImage", typeof(bool), typeof(MessageBox), new PropertyMetadata(ValueBoxes.FalseBox));
+        nameof(ShowImage), typeof(bool), typeof(MessageBox), new PropertyMetadata(ValueBoxes.FalseBox));
 
         public bool ShowImage
         {
@@ -136,6 +136,7 @@ namespace HandyControl.Controls
 
         protected override void OnClosed(EventArgs e)
         {
+   // 这里不能恢复焦点，会造成切换窗口后焦点混乱。
             //InteropMethods.SetForegroundWindow(_lastActiveWindowIntPtr);
 
             base.OnClosed(e);
@@ -457,7 +458,7 @@ namespace HandyControl.Controls
             {
                 Message = messageBoxText,
                 Owner = ownerWindow,
-                WindowStartupLocation = WindowStartupLocation.CenterScreen,
+            WindowStartupLocation = ownerIsNull ? WindowStartupLocation.CenterScreen : WindowStartupLocation.CenterOwner,
                 ShowTitle = true,
                 Title = caption ?? string.Empty,
                 Topmost = ownerIsNull,
@@ -470,6 +471,7 @@ namespace HandyControl.Controls
             switch (messageBoxButton)
             {
                 case MessageBoxButton.OK:
+                messageBox._messageBoxResult = MessageBoxResult.Yes;
                     messageBox._showOk = true;
                     messageBox._buttonOk = new Button
                     {
@@ -482,6 +484,7 @@ namespace HandyControl.Controls
 
                     break;
                 case MessageBoxButton.OKCancel:
+                messageBox._messageBoxResult = MessageBoxResult.Cancel;
                     messageBox._showOk = true;
                     messageBox._buttonOk = new Button
                     {
@@ -512,6 +515,7 @@ namespace HandyControl.Controls
 
                     break;
                 case MessageBoxButton.YesNo:
+                messageBox._messageBoxResult = MessageBoxResult.Cancel;
                     messageBox._showYes = true;
                     messageBox._buttonYes = new Button
                     {
@@ -541,6 +545,7 @@ namespace HandyControl.Controls
 
                     break;
                 case MessageBoxButton.YesNoCancel:
+                messageBox._messageBoxResult = MessageBoxResult.Cancel;
                     messageBox._showYes = true;
                     messageBox._buttonYes = new Button
                     {
@@ -651,4 +656,3 @@ namespace HandyControl.Controls
                    || value == MessageBoxResult.Yes;
         }
     }
-}
