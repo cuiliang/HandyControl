@@ -451,7 +451,7 @@ namespace HandyControl.Controls;
                 throw new InvalidEnumArgumentException(nameof(defaultResult), (int) defaultResult, typeof(MessageBoxResult));
             }
 
-            var ownerWindow = owner ?? WindowHelper.GetActiveWindow();
+            var ownerWindow = owner; // ?? WindowHelper.GetActiveWindow();  CUILIANG 20230902 修复弹窗不居中问题。
             var ownerIsNull = ownerWindow is null;
 
             return new MessageBox
