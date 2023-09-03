@@ -471,7 +471,7 @@ namespace HandyControl.Controls;
             switch (messageBoxButton)
             {
                 case MessageBoxButton.OK:
-                messageBox._messageBoxResult = MessageBoxResult.Yes;
+                messageBox._messageBoxResult = MessageBoxResult.None;  // 默认设置为None，避免点击X的时候也得到确认的结果。
                     messageBox._showOk = true;
                     messageBox._buttonOk = new Button
                     {
