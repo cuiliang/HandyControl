@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Markup;
 using HandyControl.Data;
@@ -19,7 +20,7 @@ public class ToggleBlock : Control
     public static readonly DependencyProperty IndeterminateContentProperty = DependencyProperty.Register(nameof(IndeterminateContent), typeof(object), typeof(ToggleBlock), new PropertyMetadata(default(object)));
     public static readonly DependencyProperty ToggleGestureProperty = DependencyProperty.Register(nameof(ToggleGesture), typeof(MouseGesture), typeof(ToggleBlock), new UIPropertyMetadata(new MouseGesture(MouseAction.None), OnToggleGestureChanged));
 
-    private MouseBinding _toggleBinding;
+    //private MouseBinding _toggleBinding;
 
     [Category("Appearance")]
     [TypeConverter(typeof(NullableBoolConverter))]
@@ -66,6 +67,14 @@ public class ToggleBlock : Control
     {
         CommandBindings.Add(new CommandBinding(ControlCommands.Toggle, OnToggled));
         OnToggleGestureChanged(ToggleGesture);
+
+        Unloaded += OnUnloaded;
+    }
+
+    private void OnUnloaded(object sender, RoutedEventArgs e)
+    {
+        this.Unloaded -= OnUnloaded;
+        InputBindings.Clear();
     }
 
     private static void OnToggleGestureChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -75,10 +84,29 @@ public class ToggleBlock : Control
 
     private void OnToggleGestureChanged(MouseGesture newValue)
     {
-        InputBindings.Remove(_toggleBinding);
-        _toggleBinding = new MouseBinding(ControlCommands.Toggle, newValue);
-        InputBindings.Add(_toggleBinding);
+        InputBinding bindingToRemove = null;
+        foreach (InputBinding binding in InputBindings)
+        {
+            if (binding is MouseBinding mouseBinding && mouseBinding.Command == ControlCommands.Toggle)
+            {
+                bindingToRemove = binding;
+                break;
+            }
+        }
+
+        if (bindingToRemove != null)
+        {
+            InputBindings.Remove(bindingToRemove);
+        }
+
+        if (newValue.MouseAction != MouseAction.None)
+        {
+            var toggleBinding = new MouseBinding(ControlCommands.Toggle, newValue);
+            InputBindings.Add(toggleBinding);
+        }
+       
     }
+
 
     private void OnToggled(object sender, ExecutedRoutedEventArgs e)
     {

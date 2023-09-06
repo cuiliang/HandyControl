@@ -188,6 +188,15 @@ public class ImageViewer : Control
             _isLoaded = true;
             Init();
         };
+
+        Unloaded += ImageViewer_Unloaded;
+    }
+
+    private void ImageViewer_Unloaded(object sender, RoutedEventArgs e)
+    {
+        Unloaded -= ImageViewer_Unloaded;
+
+        InputBindings.Clear();
     }
 
     /// <summary>
