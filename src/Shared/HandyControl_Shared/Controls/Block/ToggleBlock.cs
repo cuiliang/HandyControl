@@ -65,17 +65,31 @@ public class ToggleBlock : Control
 
     public ToggleBlock()
     {
-        CommandBindings.Add(new CommandBinding(ControlCommands.Toggle, OnToggled));
+        //CommandBindings.Add(new CommandBinding(ControlCommands.Toggle, OnToggled));
         OnToggleGestureChanged(ToggleGesture);
 
-        Unloaded += OnUnloaded;
+        
+        //Unloaded += OnUnloaded;
     }
 
-    private void OnUnloaded(object sender, RoutedEventArgs e)
+    // 是否开启鼠标按下时切换。使用此方式主要是为了解决MouseGesture触发不稳定的问题。
+    private bool _toggleOnMouseDown = false;
+
+    protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
     {
-        this.Unloaded -= OnUnloaded;
-        InputBindings.Clear();
+        base.OnMouseLeftButtonDown(e);
+
+        if (_toggleOnMouseDown)
+        {
+            SetCurrentValue(IsCheckedProperty, IsChecked == true ? ValueBoxes.FalseBox : ValueBoxes.TrueBox);
+        }
     }
+
+    //private void OnUnloaded(object sender, RoutedEventArgs e)
+    //{
+    //    this.Unloaded -= OnUnloaded;
+    //    //InputBindings.Clear();
+    //}
 
     private static void OnToggleGestureChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
@@ -84,6 +98,15 @@ public class ToggleBlock : Control
 
     private void OnToggleGestureChanged(MouseGesture newValue)
     {
+        if (newValue.MouseAction != MouseAction.None)
+        {
+            _toggleOnMouseDown = true;
+        }
+        else
+        {
+            _toggleOnMouseDown = false;
+        }
+        /*
         InputBinding bindingToRemove = null;
         foreach (InputBinding binding in InputBindings)
         {
@@ -104,12 +127,12 @@ public class ToggleBlock : Control
             var toggleBinding = new MouseBinding(ControlCommands.Toggle, newValue);
             InputBindings.Add(toggleBinding);
         }
-       
+       */
     }
 
 
-    private void OnToggled(object sender, ExecutedRoutedEventArgs e)
-    {
-        SetCurrentValue(IsCheckedProperty, IsChecked == true ? ValueBoxes.FalseBox : ValueBoxes.TrueBox);
-    }
+    //private void OnToggled(object sender, ExecutedRoutedEventArgs e)
+    //{
+    //    SetCurrentValue(IsCheckedProperty, IsChecked == true ? ValueBoxes.FalseBox : ValueBoxes.TrueBox);
+    //}
 }
