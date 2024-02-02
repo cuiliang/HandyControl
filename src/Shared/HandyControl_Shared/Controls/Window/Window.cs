@@ -261,16 +261,23 @@ namespace HandyControl.Controls
         protected override void OnStateChanged(EventArgs e)
         {
             base.OnStateChanged(e);
+
+            //Padding = WindowState == WindowState.Maximized ? WindowHelper.WindowMaximizedPadding : _commonPadding;
+
             if (WindowState == WindowState.Maximized)
             {
                 BorderThickness = new Thickness();
-                _tempNonClientAreaHeight = NonClientAreaHeight;
-                NonClientAreaHeight += 8;
+                Padding = WindowHelper.WindowMaximizedPadding;
+
+                //_tempNonClientAreaHeight = NonClientAreaHeight;
+                //NonClientAreaHeight += 8;
             }
             else
             {
                 BorderThickness = _actualBorderThickness;
-                NonClientAreaHeight = _tempNonClientAreaHeight;
+                //NonClientAreaHeight = _tempNonClientAreaHeight;
+
+                Padding = _commonPadding;
             }
         }
 
@@ -358,8 +365,8 @@ namespace HandyControl.Controls
                     Padding = WindowState == WindowState.Maximized ? WindowHelper.WindowMaximizedPadding : _commonPadding;
                     break;
                 case InteropValues.WM_GETMINMAXINFO:
-                    WmGetMinMaxInfo(hwnd, lparam);
-                    Padding = WindowState == WindowState.Maximized ? WindowHelper.WindowMaximizedPadding : _commonPadding;
+                    //WmGetMinMaxInfo(hwnd, lparam);
+                    //Padding = WindowState == WindowState.Maximized ? WindowHelper.WindowMaximizedPadding : _commonPadding;
                     break;
                 case InteropValues.WM_NCHITTEST:
                     // for fixing #886
