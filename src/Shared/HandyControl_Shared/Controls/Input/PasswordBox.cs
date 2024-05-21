@@ -201,6 +201,20 @@ public class PasswordBox : Control
         }
     }
 
+    /// <summary>
+    /// 自动设置焦点到内部控件
+    /// CUILIANG 20240521
+    /// </summary>
+    /// <param name="e"></param>
+    protected override void OnGotFocus(RoutedEventArgs e)
+    {
+        if (ActualPasswordBox != null)
+        {
+            ActualPasswordBox.Focus();
+        }
+        base.OnGotFocus(e);
+    }
+
     public override void OnApplyTemplate()
     {
         if (ActualPasswordBox != null)
