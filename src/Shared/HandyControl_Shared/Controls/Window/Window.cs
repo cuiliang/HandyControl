@@ -313,11 +313,13 @@ namespace HandyControl.Controls
                 _tempNonClientAreaHeight -= 8;
             }
 
-            if (SizeToContent != SizeToContent.WidthAndHeight)
-                return;
 
-            SizeToContent = SizeToContent.Height;
-            Dispatcher.BeginInvoke(new Action(() => { SizeToContent = SizeToContent.WidthAndHeight; }));
+            //CUILIANG 20240710 下面的代码可能让窗口意外的变高
+            //if (SizeToContent != SizeToContent.WidthAndHeight)
+            //    return;
+
+            //SizeToContent = SizeToContent.Height;
+            //Dispatcher.BeginInvoke(new Action(() => { SizeToContent = SizeToContent.WidthAndHeight; }));
         }
 
         protected override void OnContentRendered(EventArgs e)
