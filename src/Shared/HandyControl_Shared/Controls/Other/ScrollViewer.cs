@@ -32,6 +32,10 @@ public class ScrollViewer : System.Windows.Controls.ScrollViewer
         set => SetValue(CanMouseWheelProperty, ValueBoxes.BooleanBox(value));
     }
 
+    /// <summary>
+    ///  当内部控件不需要滚动（未出现滚动条），或者已经滚动到顶部或底部的时候，可以避免影响滚轮滚动外部ScrollViewer。
+    /// </summary>
+    /// <param name="e"></param>
     protected override void OnPreviewMouseWheel(MouseWheelEventArgs e)
     {
         // 当前滚动位置
