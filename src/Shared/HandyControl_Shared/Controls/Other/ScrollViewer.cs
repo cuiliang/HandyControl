@@ -32,6 +32,36 @@ public class ScrollViewer : System.Windows.Controls.ScrollViewer
         set => SetValue(CanMouseWheelProperty, ValueBoxes.BooleanBox(value));
     }
 
+    protected override void OnPreviewMouseWheel(MouseWheelEventArgs e)
+    {
+        // 当前滚动位置
+        double offset = VerticalOffset;
+        // 最大可滚动的距离
+        double maxOffset = ScrollableHeight;
+
+        // e.Delta > 0 表示向上滚动，< 0 表示向下滚动
+        bool atTop = (offset <= 0);
+        bool atBottom = (offset >= maxOffset);
+
+        // 如果已经滚到顶还继续往上滚，或者已经滚到底还继续往下滚
+        // 就把事件重新“扔”给外层去处理
+        if ((e.Delta > 0 && atTop) || (e.Delta < 0 && atBottom))
+        {
+            e.Handled = true; // 阻止内层继续处理
+            // 重新构造一个 MouseWheelEventArgs 并用 Bubble 的方式 Raise 到父元素
+            var args = new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta)
+            {
+                RoutedEvent = UIElement.MouseWheelEvent,
+                Source = e.Source
+            };
+            // 父级可能是 ListBox 的父容器，也可能是别的 UIElement
+            (Parent as UIElement)?.RaiseEvent(args);
+            return;
+        }
+
+        base.OnPreviewMouseWheel(e);
+    }
+
     protected override void OnMouseWheel(MouseWheelEventArgs e)
     {
         if (!CanMouseWheel) return;
