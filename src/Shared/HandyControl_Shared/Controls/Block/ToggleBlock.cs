@@ -68,7 +68,7 @@ public class ToggleBlock : Control
         //CommandBindings.Add(new CommandBinding(ControlCommands.Toggle, OnToggled));
         OnToggleGestureChanged(ToggleGesture);
 
-        
+
         //Unloaded += OnUnloaded;
     }
 
