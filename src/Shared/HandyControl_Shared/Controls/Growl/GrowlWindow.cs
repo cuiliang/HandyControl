@@ -16,7 +16,7 @@ public sealed class GrowlWindow : Window
     {
         WindowStyle = WindowStyle.None;
         AllowsTransparency = true;
-        
+
 
         GrowlPanel = new StackPanel
         {
