@@ -320,6 +320,10 @@ namespace HandyControl.Controls
 
             //SizeToContent = SizeToContent.Height;
             //Dispatcher.BeginInvoke(new Action(() => { SizeToContent = SizeToContent.WidthAndHeight; }));
+
+            // 以下代码用于解决MessageBox弹窗刚显示的时候在右侧和底边有黑边的问题。
+            if (SizeToContent == SizeToContent.WidthAndHeight)
+                InvalidateMeasure();
         }
 
         protected override void OnContentRendered(EventArgs e)
